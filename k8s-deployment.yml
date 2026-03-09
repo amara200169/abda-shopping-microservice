@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopping-web
+  namespace: abda-it-env
+  labels:
+    app: shopping-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shopping-web
+  template:
+    metadata:
+      labels:
+        app: shopping-web
+    spec:
+      containers:
+        - name: shopping-web
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: shopping-page
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: shopping-page
+          configMap:
+            name: shopping-web-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shopping-web-content
+  namespace: abda-it-env
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>ABDA Shopping Services</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 0;
+          text-align: center;
+        }
+        header {
+          background-color: #222;
+          color: white;
+          padding: 20px;
+        }
+        .container {
+          margin: 40px auto;
+          width: 80%;
+        }
+        .card {
+          background: white;
+          padding: 20px;
+          margin: 20px;
+          border-radius: 10px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+          display: inline-block;
+          width: 250px;
+        }
+        button {
+          background-color: #007bff;
+          color: white;
+          border: none;
+          padding: 10px 15px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+        button:hover {
+          background-color: #0056b3;
+        }
+      </style>
+    </head>
+    <body>
+      <header>
+        <h1>Welcome to ABDA Shopping Services</h1>
+        <p>Your trusted online store for phones and digital services</p>
+      </header>
+      <div class="container">
+        <div class="card">
+          <h2>iPhone 15</h2>
+          <p>Latest Apple smartphone with premium features.</p>
+          <button>Buy Now</button>
+        </div>
+        <div class="card">
+          <h2>Samsung Galaxy S24</h2>
+          <p>Powerful Android phone with advanced camera.</p>
+          <button>Buy Now</button>
+        </div>
+        <div class="card">
+          <h2>Phone Repair Service</h2>
+          <p>Fast and reliable repair services for all devices.</p>
+          <button>Order Service</button>
+        </div>
+      </div>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shopping-web-service
+  namespace: abda-it-env
+spec:
+  selector:
+    app: shopping-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer

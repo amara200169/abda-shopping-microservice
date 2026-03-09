@@ -1,0 +1,814 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopping-web
+  namespace: abda-it-env
+  labels:
+    app: shopping-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shopping-web
+  template:
+    metadata:
+      labels:
+        app: shopping-web
+    spec:
+      containers:
+        - name: shopping-web
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: shopping-page
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: shopping-page
+          configMap:
+            name: shopping-web-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shopping-web-content
+  namespace: abda-it-env
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>ABDA Shopping Services</title>
+      <style>
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+          margin: 0;
+          font-family: Arial, sans-serif;
+          background:
+            radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 22%),
+            radial-gradient(circle at top right, rgba(168, 85, 247, 0.10), transparent 20%),
+            linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+          color: #111827;
+          min-height: 100vh;
+        }
+
+        .navbar {
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+          backdrop-filter: blur(10px);
+          background: rgba(15, 23, 42, 0.88);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        }
+
+        .nav-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 14px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+        }
+
+        .brand {
+          color: white;
+          text-decoration: none;
+          font-size: 1.25rem;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+        }
+
+        .brand span { color: #60a5fa; }
+
+        .nav-links {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+
+        .nav-links a {
+          color: rgba(255,255,255,0.88);
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 0.92rem;
+          transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-links a:hover {
+          color: white;
+          transform: translateY(-1px);
+        }
+
+        .nav-cta {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          color: white;
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          padding: 10px 15px;
+          border-radius: 12px;
+          font-weight: 800;
+          box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
+          transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .nav-cta:hover {
+          transform: translateY(-2px);
+          opacity: 0.96;
+        }
+
+        .hero {
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 52%, #2563eb 100%);
+          color: white;
+          padding: 68px 20px 56px;
+          text-align: center;
+          box-shadow: 0 14px 34px rgba(15, 23, 42, 0.22);
+        }
+
+        .hero h1 {
+          margin: 0;
+          font-size: 3rem;
+          font-weight: 900;
+          letter-spacing: -1px;
+          animation: fadeUp 0.7s ease forwards;
+        }
+
+        .hero p {
+          margin: 16px auto 0;
+          max-width: 760px;
+          font-size: 1.08rem;
+          color: rgba(255, 255, 255, 0.9);
+          line-height: 1.8;
+          animation: fadeUp 0.95s ease forwards;
+        }
+
+        .hero-actions {
+          margin-top: 26px;
+          display: flex;
+          justify-content: center;
+          gap: 14px;
+          flex-wrap: wrap;
+          animation: fadeUp 1.15s ease forwards;
+        }
+
+        .hero-btn,
+        .hero-btn-secondary {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          padding: 14px 20px;
+          border-radius: 14px;
+          font-weight: 800;
+          transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .hero-btn {
+          color: white;
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
+        }
+
+        .hero-btn-secondary {
+          color: white;
+          border: 1px solid rgba(255,255,255,0.22);
+          background: rgba(255,255,255,0.08);
+        }
+
+        .hero-btn:hover,
+        .hero-btn-secondary:hover {
+          transform: translateY(-2px);
+          opacity: 0.96;
+        }
+
+        .section {
+          max-width: 1240px;
+          margin: 0 auto;
+          padding: 48px 20px 70px;
+        }
+
+        .section-title {
+          text-align: center;
+          margin: 0 0 10px;
+          font-size: 2.1rem;
+          font-weight: 900;
+          color: #0f172a;
+        }
+
+        .section-subtitle {
+          text-align: center;
+          margin: 0 0 38px;
+          color: #475569;
+          font-size: 1rem;
+        }
+
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 30px;
+        }
+
+        .card {
+          background: rgba(255, 255, 255, 0.94);
+          border: 1px solid rgba(255, 255, 255, 0.72);
+          border-radius: 24px;
+          overflow: hidden;
+          box-shadow: 0 18px 42px rgba(15, 23, 42, 0.10);
+          transition: transform 0.28s ease, box-shadow 0.28s ease;
+          animation: fadeUp 0.8s ease forwards;
+        }
+
+        .card:hover {
+          transform: translateY(-8px) scale(1.01);
+          box-shadow: 0 26px 54px rgba(15, 23, 42, 0.14);
+        }
+
+        .card-media {
+          position: relative;
+          height: 220px;
+          overflow: hidden;
+          background: linear-gradient(135deg, #0f172a, #334155);
+        }
+
+        .card-media img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.45s ease;
+        }
+
+        .card:hover .card-media img {
+          transform: scale(1.06);
+        }
+
+        .media-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(15,23,42,0.22), rgba(15,23,42,0.04));
+        }
+
+        .card-body { padding: 24px 22px 22px; }
+
+        .badge {
+          display: inline-block;
+          padding: 6px 12px;
+          border-radius: 999px;
+          font-size: 0.78rem;
+          font-weight: 800;
+          margin-bottom: 16px;
+          background: #e0e7ff;
+          color: #3730a3;
+        }
+
+        .repair-badge {
+          background: #ccfbf1;
+          color: #0f766e;
+        }
+
+        .card h2 {
+          margin: 0 0 12px;
+          font-size: 1.7rem;
+          color: #0f172a;
+        }
+
+        .card p {
+          margin: 0 0 22px;
+          color: #475569;
+          line-height: 1.75;
+          font-size: 1rem;
+        }
+
+        .card-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 14px;
+          flex-wrap: wrap;
+        }
+
+        .price {
+          font-size: 1.2rem;
+          font-weight: 900;
+          color: #111827;
+        }
+
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          border-radius: 14px;
+          padding: 13px 18px;
+          font-weight: 800;
+          color: white;
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
+          transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .btn:hover {
+          transform: translateY(-2px);
+          opacity: 0.96;
+        }
+
+        .repair-btn {
+          background: linear-gradient(135deg, #0f766e, #0d9488);
+          box-shadow: 0 10px 24px rgba(13, 148, 136, 0.24);
+        }
+
+        .footer {
+          text-align: center;
+          padding: 18px 20px 34px;
+          color: #64748b;
+          font-size: 0.95rem;
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+          .hero h1 { font-size: 2.4rem; }
+          .nav-inner {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .nav-links {
+            width: 100%;
+            justify-content: flex-start;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .hero {
+            padding: 56px 18px 48px;
+          }
+
+          .hero h1 { font-size: 2rem; }
+
+          .card-footer {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .btn, .nav-cta {
+            width: 100%;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <nav class="navbar">
+        <div class="nav-inner">
+          <a class="brand" href="/">ABDA <span>Store</span></a>
+          <div class="nav-links">
+            <a href="#featured">Products</a>
+            <a href="/service.html?slug=repair">Repairs</a>
+            <a href="/service.html?slug=iphone15">iPhone 15</a>
+            <a href="/service.html?slug=samsung-s24">Galaxy S24</a>
+          </div>
+          <a class="nav-cta" href="/service.html?slug=repair">Book Repair</a>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <h1>ABDA Shopping Services</h1>
+        <p>
+          Explore premium smartphones and trusted repair services through a clean,
+          modern shopping experience powered by your backend microservice and PostgreSQL.
+        </p>
+        <div class="hero-actions">
+          <a class="hero-btn" href="#featured">Browse Products</a>
+          <a class="hero-btn-secondary" href="/service.html?slug=repair">Schedule a Repair</a>
+        </div>
+      </section>
+
+      <section class="section" id="featured">
+        <h2 class="section-title">Featured Services</h2>
+        <p class="section-subtitle">
+          Choose a product or repair service to view full details.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <div class="card-media">
+              <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=900&q=80" alt="iPhone 15" />
+              <div class="media-overlay"></div>
+            </div>
+            <div class="card-body">
+              <span class="badge">Apple</span>
+              <h2>iPhone 15</h2>
+              <p>Latest Apple smartphone with premium features and modern performance.</p>
+              <div class="card-footer">
+                <div class="price">$999.99</div>
+                <a class="btn" href="/service.html?slug=iphone15">View Product</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-media">
+              <img src="https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=900&q=80" alt="Samsung Galaxy S24" />
+              <div class="media-overlay"></div>
+            </div>
+            <div class="card-body">
+              <span class="badge">Samsung</span>
+              <h2>Samsung Galaxy S24</h2>
+              <p>Powerful Android phone with an advanced camera and sleek flagship design.</p>
+              <div class="card-footer">
+                <div class="price">$899.99</div>
+                <a class="btn" href="/service.html?slug=samsung-s24">View Product</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-media">
+              <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=80" alt="Phone repair service" />
+              <div class="media-overlay"></div>
+            </div>
+            <div class="card-body">
+              <span class="badge repair-badge">Repair</span>
+              <h2>Phone Repair Service</h2>
+              <p>Fast, reliable support for device issues, repairs, and appointment scheduling.</p>
+              <div class="card-footer">
+                <div class="price">Book Now</div>
+                <a class="btn repair-btn" href="/service.html?slug=repair">Schedule Repair</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer">
+        Powered by ABDA microservices, Kubernetes, and PostgreSQL.
+      </div>
+    </body>
+    </html>
+
+  service.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Service Details</title>
+      <style>
+        * { box-sizing: border-box; }
+
+        body {
+          margin: 0;
+          font-family: Arial, sans-serif;
+          background:
+            radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 20%),
+            radial-gradient(circle at top right, rgba(168, 85, 247, 0.10), transparent 20%),
+            linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+          color: #111827;
+          min-height: 100vh;
+        }
+
+        .topbar {
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+          backdrop-filter: blur(10px);
+          background: rgba(15, 23, 42, 0.88);
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .topbar-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 14px 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+
+        .brand {
+          color: white;
+          text-decoration: none;
+          font-size: 1.2rem;
+          font-weight: 800;
+        }
+
+        .back-link {
+          text-decoration: none;
+          color: #93c5fd;
+          font-weight: 700;
+        }
+
+        .wrapper {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 36px 18px 60px;
+        }
+
+        .shell {
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 28px;
+          align-items: start;
+        }
+
+        .panel {
+          background: rgba(255, 255, 255, 0.94);
+          border: 1px solid rgba(255, 255, 255, 0.78);
+          border-radius: 24px;
+          box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+          padding: 28px;
+        }
+
+        .title {
+          margin: 0 0 18px;
+          font-size: 2.4rem;
+          font-weight: 900;
+          color: #0f172a;
+        }
+
+        .image-wrap {
+          width: 100%;
+          background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+          border-radius: 20px;
+          padding: 20px;
+          margin-bottom: 22px;
+          text-align: center;
+        }
+
+        img {
+          width: 100%;
+          max-width: 420px;
+          max-height: 360px;
+          object-fit: cover;
+          border-radius: 18px;
+          box-shadow: 0 16px 30px rgba(15, 23, 42, 0.14);
+        }
+
+        .hidden { display: none; }
+
+        .desc {
+          font-size: 1.05rem;
+          line-height: 1.8;
+          color: #475569;
+          margin-bottom: 20px;
+        }
+
+        .meta {
+          display: grid;
+          gap: 14px;
+        }
+
+        .meta-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          padding: 16px 18px;
+        }
+
+        .meta-label {
+          font-size: 0.82rem;
+          color: #64748b;
+          font-weight: 700;
+          text-transform: uppercase;
+          margin-bottom: 6px;
+        }
+
+        .meta-value {
+          font-size: 1.15rem;
+          font-weight: 800;
+          color: #0f172a;
+        }
+
+        .form-title {
+          margin: 0 0 18px;
+          font-size: 1.6rem;
+          font-weight: 900;
+        }
+
+        .form-subtitle {
+          margin: 0 0 22px;
+          color: #475569;
+          line-height: 1.7;
+        }
+
+        .form-grid {
+          display: grid;
+          gap: 14px;
+        }
+
+        input, textarea {
+          width: 100%;
+          border: 1px solid #cbd5e1;
+          border-radius: 14px;
+          padding: 14px 16px;
+          font-size: 0.98rem;
+          outline: none;
+          background: white;
+        }
+
+        input:focus, textarea:focus {
+          border-color: #2563eb;
+          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+
+        textarea {
+          min-height: 120px;
+          resize: vertical;
+        }
+
+        .submit-btn {
+          border: none;
+          border-radius: 14px;
+          padding: 14px 18px;
+          font-size: 1rem;
+          font-weight: 800;
+          color: white;
+          cursor: pointer;
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          box-shadow: 0 12px 26px rgba(37, 99, 235, 0.26);
+        }
+
+        .message {
+          margin-top: 14px;
+          font-weight: 700;
+          color: #0f766e;
+        }
+
+        @media (max-width: 900px) {
+          .shell { grid-template-columns: 1fr; }
+          .title { font-size: 2rem; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="topbar">
+        <div class="topbar-inner">
+          <a class="brand" href="/">ABDA Store</a>
+          <a class="back-link" href="/">← Back to Home</a>
+        </div>
+      </div>
+
+      <div class="wrapper">
+        <div class="shell">
+          <div class="panel">
+            <h1 id="name" class="title">Loading...</h1>
+
+            <div id="image-wrap" class="image-wrap hidden">
+              <img id="image" alt="Service image" />
+            </div>
+
+            <p id="description" class="desc"></p>
+
+            <div class="meta">
+              <div id="price-card" class="meta-card hidden">
+                <div class="meta-label">Price</div>
+                <div id="price" class="meta-value"></div>
+              </div>
+
+              <div id="location-card" class="meta-card hidden">
+                <div class="meta-label">Location</div>
+                <div id="location" class="meta-value"></div>
+              </div>
+
+              <div id="phone-card" class="meta-card hidden">
+                <div class="meta-label">Phone Number</div>
+                <div id="phone" class="meta-value"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="appointment-section" class="panel hidden">
+            <h2 class="form-title">Schedule Repair Appointment</h2>
+            <p class="form-subtitle">
+              Fill in your information below and submit your repair request.
+            </p>
+
+            <form id="appointment-form" class="form-grid">
+              <input type="text" id="customer_name" placeholder="Your Name" required />
+              <input type="text" id="customer_phone" placeholder="Phone Number" required />
+              <input type="email" id="customer_email" placeholder="Email Address" />
+              <input type="text" id="device_type" placeholder="Device Type" required />
+              <textarea id="issue_description" placeholder="Describe the issue" required></textarea>
+              <input type="date" id="preferred_date" required />
+              <input type="text" id="preferred_time" placeholder="Preferred Time" required />
+              <button type="submit" class="submit-btn">Book Appointment</button>
+            </form>
+
+            <p id="appointment-message" class="message"></p>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        const params = new URLSearchParams(window.location.search);
+        const slug = params.get("slug");
+        const API_BASE = "http://a95267f819b9a4ad299239807d8a1ba4-1688966867.us-east-1.elb.amazonaws.com:5000";
+
+        fetch(`${API_BASE}/api/services/${slug}`)
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById("name").innerText = data.name || "Service";
+            document.getElementById("description").innerText =
+              data.description || "No description available.";
+
+            if (data.image_url) {
+              const image = document.getElementById("image");
+              image.src = data.image_url;
+              document.getElementById("image-wrap").classList.remove("hidden");
+            }
+
+            if (data.price) {
+              document.getElementById("price").innerText = `$${data.price}`;
+              document.getElementById("price-card").classList.remove("hidden");
+            }
+
+            if (data.location) {
+              document.getElementById("location").innerText = data.location;
+              document.getElementById("location-card").classList.remove("hidden");
+            }
+
+            if (data.phone_number) {
+              document.getElementById("phone").innerText = data.phone_number;
+              document.getElementById("phone-card").classList.remove("hidden");
+            }
+
+            if (data.type === "repair") {
+              document.getElementById("appointment-section").classList.remove("hidden");
+            }
+          })
+          .catch(error => {
+            console.error("Failed to load service:", error);
+            document.getElementById("name").innerText = "Failed to load service";
+            document.getElementById("description").innerText =
+              "Please refresh the page or try again later.";
+          });
+
+        document.getElementById("appointment-form").addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const payload = {
+            service_slug: slug,
+            customer_name: document.getElementById("customer_name").value,
+            customer_phone: document.getElementById("customer_phone").value,
+            customer_email: document.getElementById("customer_email").value,
+            device_type: document.getElementById("device_type").value,
+            issue_description: document.getElementById("issue_description").value,
+            preferred_date: document.getElementById("preferred_date").value,
+            preferred_time: document.getElementById("preferred_time").value
+          };
+
+          const message = document.getElementById("appointment-message");
+
+          try {
+            const res = await fetch(`${API_BASE}/api/appointments`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+              message.style.color = "#b91c1c";
+              message.innerText = data.error || "Failed to schedule appointment";
+              return;
+            }
+
+            message.style.color = "#0f766e";
+            message.innerText = "Appointment booked successfully!";
+            document.getElementById("appointment-form").reset();
+          } catch (err) {
+            console.error(err);
+            message.style.color = "#b91c1c";
+            message.innerText = "Error submitting appointment";
+          }
+        });
+      </script>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shopping-web-service
+  namespace: abda-it-env
+spec:
+  selector:
+    app: shopping-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer

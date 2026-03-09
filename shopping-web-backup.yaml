@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app":"shopping-web"},"name":"shopping-web","namespace":"abda-it-env"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"shopping-web"}},"template":{"metadata":{"labels":{"app":"shopping-web"}},"spec":{"containers":[{"image":"nginx:latest","name":"shopping-web","ports":[{"containerPort":80}],"volumeMounts":[{"mountPath":"/usr/share/nginx/html","name":"shopping-page"}]}],"volumes":[{"configMap":{"name":"shopping-web-content"},"name":"shopping-page"}]}}}}
+  creationTimestamp: "2026-03-08T04:12:17Z"
+  generation: 1
+  labels:
+    app: shopping-web
+  name: shopping-web
+  namespace: abda-it-env
+  resourceVersion: "3460444"
+  uid: 5a2ea06e-3b7b-493f-a822-75afa66b8e75
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: shopping-web
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: shopping-web
+    spec:
+      containers:
+      - image: nginx:latest
+        imagePullPolicy: Always
+        name: shopping-web
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: shopping-page
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: shopping-web-content
+        name: shopping-page
+status:
+  availableReplicas: 2
+  conditions:
+  - lastTransitionTime: "2026-03-08T04:12:19Z"
+    lastUpdateTime: "2026-03-08T04:12:19Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2026-03-08T04:12:17Z"
+    lastUpdateTime: "2026-03-08T04:12:19Z"
+    message: ReplicaSet "shopping-web-65676d67f4" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  readyReplicas: 2
+  replicas: 2
+  updatedReplicas: 2
