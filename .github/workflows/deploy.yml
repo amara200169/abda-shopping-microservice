@@ -1,0 +1,45 @@
+name: ABDA Store CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: |
+          docker build -t amara125/shopping-api:latest ./shopping-api
+
+      - name: Push Docker Image
+        run: |
+          docker push amara125/shopping-api:latest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+
+      - name: Configure Kubernetes
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name abda-prospective-eks-cluster
+
+      - name: Restart Kubernetes Deployment
+        run: |
+          kubectl rollout restart deployment shopping-api -n abda-it-env
