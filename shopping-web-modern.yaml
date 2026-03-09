@@ -384,8 +384,7 @@ data:
       <section class="hero">
         <h1>ABDA Shopping Services</h1>
         <p>
-          Explore premium smartphones and trusted repair services through a clean,
-          modern shopping experience powered by your backend microservice and PostgreSQL.
+          Shop premium smartphones and book trusted repair services through our fast and modern digital platform.
         </p>
         <div class="hero-actions">
           <a class="hero-btn" href="#featured">Browse Products</a>
